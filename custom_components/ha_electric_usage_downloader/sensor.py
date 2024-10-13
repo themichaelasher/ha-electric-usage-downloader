@@ -8,8 +8,11 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the sensor platform from a config entry."""
-    coordinator = hass.data[DOMAIN][config_entry.entry_id]
-    async_add_entities([ElectricUsageSensor(coordinator)])
+    try:
+        coordinator = hass.data[DOMAIN][config_entry.entry_id]
+        async_add_entities([ElectricUsageSensor(coordinator)])
+    except KeyError as e:
+        _LOGGER.error(f"Error setting up sensor entry: {e}")
 
 class ElectricUsageSensor(CoordinatorEntity, SensorEntity):
     """Representation of an electric usage sensor."""

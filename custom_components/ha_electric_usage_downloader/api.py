@@ -26,32 +26,47 @@ class ElectricUsageAPI:
             "User-Agent": "Mozilla/5.0",
             "Content-Type": "application/x-www-form-urlencoded"
         }
-        async with self.session.post(self.login_url, data=payload, headers=headers) as response:
-            if response.status == 200:
-                _LOGGER.debug("Successfully logged in to PEC SmartHub")
-                self.cookies = response.cookies
-            else:
-                _LOGGER.error(f"Failed to log in to PEC SmartHub: {response.status}")
-                raise Exception("Login failed")
+        try:
+            async with self.session.post(self.login_url, data=payload, headers=headers) as response:
+                if response.status == 200:
+                    _LOGGER.debug("Successfully logged in to PEC SmartHub")
+                    self.cookies = response.cookies
+                else:
+                    _LOGGER.error(f"Failed to log in to PEC SmartHub: {response.status}")
+                    raise Exception("Login failed")
+        except Exception as e:
+            _LOGGER.error(f"Error during login: {e}")
+            raise
 
     async def get_usage_data(self):
         """Fetch electric usage data by scraping the PEC SmartHub portal."""
+        if not self.cookies:
+            await self.login()
+
         headers = {
             "User-Agent": "Mozilla/5.0"
         }
-        async with self.session.get(self.usage_url, cookies=self.cookies, headers=headers) as response:
-            if response.status != 200:
-                _LOGGER.error(f"Failed to fetch usage data: {response.status}")
-                return None
+        try:
+            async with self.session.get(self.usage_url, cookies=self.cookies, headers=headers) as response:
+                if response.status != 200:
+                    _LOGGER.error(f"Failed to fetch usage data: {response.status}")
+                    return None
 
-            html_content = await response.text()
-            soup = BeautifulSoup(html_content, "html.parser")
+                html_content = await response.text()
+                soup = BeautifulSoup(html_content, "html.parser")
 
-            # Parse the usage data
-            usage_data = self._parse_usage_data(soup)
-            return usage_data
+                # Parse the usage data
+                usage_data = self._parse_usage_data(soup)
+                return usage_data
+        except Exception as e:
+            _LOGGER.error(f"Error fetching usage data: {e}")
+            return None
 
     def _parse_usage_data(self, soup):
         """Parse the electric usage data from the HTML soup."""
-        usage_value = soup.find("td", class_="highcharts-tooltip").get_text()
-        return {"usage": float(usage_value)}
+        try:
+            usage_value = soup.find("td", class_="highcharts-tooltip").get_text()
+            return {"usage": float(usage_value)}
+        except Exception as e:
+            _LOGGER.error(f"Error parsing usage data: {e}")
+            return None
