@@ -12,7 +12,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     async_add_entities([ElectricUsageSensor(coordinator)])
 
-
 class ElectricUsageSensor(CoordinatorEntity, SensorEntity):
     """Representation of an electric usage sensor."""
 
@@ -34,4 +33,5 @@ class ElectricUsageSensor(CoordinatorEntity, SensorEntity):
     @property
     def available(self):
         """Return True if the sensor is available."""
-        # Check if the data is​⬤
+        # Check if the data is available based on last update success
+        return self.coordinator.last_update_success
