@@ -1,6 +1,6 @@
 {
   "domain": "ha_electric_usage_downloader",
-  "name": "HA Electric Usage Downloader",
+  "name": "Electric Usage Downloader",
   "version": "1.0.0",
   "documentation": "https://github.com/smue86/ha-electric-usage-downloader",
   "requirements": ["beautifulsoup4==4.9.3", "aiohttp==3.7.4"],

@@ -2,7 +2,6 @@ import logging
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import ENERGY_KILO_WATT_HOUR
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,22 +15,17 @@ class ElectricUsageSensor(CoordinatorEntity, SensorEntity):
     """Representation of an electric usage sensor."""
 
     def __init__(self, coordinator):
-        """Initialize the sensor."""
-        super().__init__(coordinator)  # Initialize the CoordinatorEntity with the coordinator
+        super().__init__(coordinator)
         self._attr_name = "Electric Usage"
         self._attr_unit_of_measurement = ENERGY_KILO_WATT_HOUR
-        self._attr_unique_id = "electric_usage"  # Unique ID for this sensor entity
+        self._attr_unique_id = "electric_usage"
 
     @property
     def native_value(self):
         """Return the current value of the sensor."""
-        # Ensure the data exists, and return the relevant field from the coordinator data
-        if self.coordinator.data:
-            return self.coordinator.data.get("usage")
-        return None
+        return self.coordinator.data.get("usage") if self.coordinator.data else None
 
     @property
     def available(self):
         """Return True if the sensor is available."""
-        # Check if the data is available based on last update success
         return self.coordinator.last_update_success
